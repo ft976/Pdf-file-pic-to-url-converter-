@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Loader2, AlertCircle, FileText, Download, Calendar, HardDrive, Clock } from "lucide-react";
+import { Loader2, AlertCircle, FileText, Download, Calendar, HardDrive, Clock, Eye } from "lucide-react";
 
 export default function ViewPage() {
   const { id } = useParams<{ id: string }>();
@@ -74,6 +74,9 @@ export default function ViewPage() {
                 <div className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-white/30" /> {new Date(fileDetails.createdAt).toLocaleDateString()}</div>
                 {fileDetails.expiresAt && (
                   <div className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-orange-400/50" /> Expires {new Date(fileDetails.expiresAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                )}
+                {fileDetails.maxViews && (
+                  <div className="flex items-center gap-1.5"><Eye className="w-3.5 h-3.5 text-orange-400/50" /> {Math.max(0, fileDetails.maxViews - fileDetails.views)} views remaining</div>
                 )}
               </div>
             </div>

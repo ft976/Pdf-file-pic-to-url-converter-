@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import fs from "fs";
+import os from "os";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 import { createServer as createViteServer } from "vite";
@@ -13,8 +14,11 @@ app.use(cors());
 app.use(express.json());
 
 // Setup storage directories
-const STORAGE_DIR = process.env.NODE_ENV === "production" ? path.join(process.cwd(), "uploads") : path.join(process.cwd(), "uploads");
-const DB_FILE = process.env.NODE_ENV === "production" ? path.join(process.cwd(), "db.json") : path.join(process.cwd(), "db.json");
+// Use /tmp for Vercel/Production for writable ephemeral storage
+const isVercel = process.env.VERCEL === "1" || !!process.env.VERCEL_ENV;
+const baseDir = process.env.NODE_ENV === "production" || isVercel ? os.tmpdir() : process.cwd();
+const STORAGE_DIR = path.join(baseDir, "uploads");
+const DB_FILE = path.join(baseDir, "db.json");
 
 if (!fs.existsSync(STORAGE_DIR)) {
   fs.mkdirSync(STORAGE_DIR, { recursive: true });
@@ -43,63 +47,78 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
-async function startServer() {
-  // API Routes
-  
-  // Static route for serving uploaded files
-  app.use("/api/raw", express.static(STORAGE_DIR));
+// API Routes
 
-  app.post("/api/upload", upload.single("file"), (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ error: "No file uploaded" });
-      }
+// Static route for serving uploaded files
+app.use("/api/raw", express.static(STORAGE_DIR));
 
-      const fileId = uuidv4();
-      const fileData = {
-        id: fileId,
-        originalName: req.file.originalname,
-        filename: req.file.filename,
-        mimetype: req.file.mimetype,
-        size: req.file.size,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 24 * 60 * 60 * 1000, // Expires in 24 hours
-      };
-
-      const db = getDb();
-      db[fileId] = fileData;
-      saveDb(db);
-
-      return res.json({ success: true, file: fileData });
-    } catch (e: any) {
-      console.error(e);
-      return res.status(500).json({ error: "Upload failed: " + e.message });
+app.post("/api/upload", upload.single("file"), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
     }
-  });
 
-  app.get("/api/files/:id", (req, res) => {
+    const fileId = uuidv4();
+    const fileData = {
+      id: fileId,
+      originalName: req.file.originalname,
+      filename: req.file.filename,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + 2 * 60 * 60 * 1000, // Expires in 2 hours
+      maxViews: 3,
+      views: 0,
+    };
+
     const db = getDb();
-    const fileData = db[req.params.id];
-    
-    if (!fileData) {
-      return res.status(404).json({ error: "File not found" });
-    }
+    db[fileId] = fileData;
+    saveDb(db);
 
-    // Check expiration immediately on access
-    if (fileData.expiresAt && Date.now() > fileData.expiresAt) {
-      // Auto-delete if expired upon access
-      delete db[req.params.id];
-      saveDb(db);
-      try {
-        fs.unlinkSync(path.join(STORAGE_DIR, fileData.filename));
-      } catch (err) {}
-      return res.status(404).json({ error: "This link has expired." });
-    }
-    
     return res.json({ success: true, file: fileData });
-  });
+  } catch (e: any) {
+    console.error(e);
+    return res.status(500).json({ error: "Upload failed: " + e.message });
+  }
+});
 
-  // Background job to clean up expired files every hour
+app.get("/api/files/:id", (req, res) => {
+  const db = getDb();
+  const fileData = db[req.params.id];
+  
+  if (!fileData) {
+    return res.status(404).json({ error: "File not found" });
+  }
+
+  // Check expiration immediately on access
+  if (fileData.expiresAt && Date.now() > fileData.expiresAt) {
+    // Auto-delete if expired upon access
+    delete db[req.params.id];
+    saveDb(db);
+    try {
+      fs.unlinkSync(path.join(STORAGE_DIR, fileData.filename));
+    } catch (err) {}
+    return res.status(404).json({ error: "This link has expired." });
+  }
+
+  fileData.views = (fileData.views || 0) + 1;
+  
+  if (fileData.views > fileData.maxViews) {
+    delete db[req.params.id];
+    saveDb(db);
+    try {
+      fs.unlinkSync(path.join(STORAGE_DIR, fileData.filename));
+    } catch (err) {}
+    return res.status(404).json({ error: "This link has reached its maximum view limit and has been deleted." });
+  }
+  
+  saveDb(db);
+  
+  return res.json({ success: true, file: fileData });
+});
+
+// Background job to clean up expired files every hour (only run if not serverless)
+if (!isVercel) {
   setInterval(() => {
     try {
       const db = getDb();
@@ -121,25 +140,32 @@ async function startServer() {
       console.error("Cleanup error", e);
     }
   }, 60 * 60 * 1000);
-
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on port ${PORT}`);
-  });
 }
 
-startServer().catch(console.error);
+// Vite middleware for development or Static route for production
+if (process.env.NODE_ENV !== "production" && !isVercel) {
+  createViteServer({
+    server: { middlewareMode: true },
+    appType: "spa",
+  }).then((vite) => {
+    app.use(vite.middlewares);
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Dev server running on port ${PORT}`);
+    });
+  });
+} else {
+  const distPath = path.join(process.cwd(), "dist");
+  app.use(express.static(distPath));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(distPath, "index.html"));
+  });
+
+  // Export app for serverless platforms like Vercel instead of listening directly
+  if (!isVercel) {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Production server running on port ${PORT}`);
+    });
+  }
+}
+
+export default app;
