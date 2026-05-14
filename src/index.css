@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #000000;
+  --color-surface: #0a0a0a;
+  --color-accent: #f97316;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Outfit', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+:root {
+  --bg: #000000;
+  --surface: rgba(20, 20, 20, 0.4);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.15);
+  --accent: #f97316;
+}
+
+body {
+  background-color: var(--bg);
+  color: #fafafa;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.glass-panel {
+  background: var(--surface);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.1) inset, 0 4px 12px rgba(249, 115, 22, 0.25);
+}
+.btn-primary:hover {
+  background: #ea580c;
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.15) inset, 0 6px 16px rgba(249, 115, 22, 0.35);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+.btn-primary:disabled {
+  background: #222;
+  color: #666;
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  color: #fff;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: var(--border-hover);
+}
+
+.blob {
+  position: fixed;
+  filter: blur(140px);
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+}
+.blob-1 { top: -20%; left: -10%; width: 50vw; height: 50vw; background: rgba(249,115,22,0.12); }
+.blob-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: rgba(168,85,247,0.08); }

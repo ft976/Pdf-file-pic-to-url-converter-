@@ -1,0 +1,6 @@
+{
+  "name": "FileShare Link",
+  "description": "Convert PDF and images into a shareable link that anyone can access.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
