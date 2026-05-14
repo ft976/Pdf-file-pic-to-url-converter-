@@ -5,8 +5,6 @@ import fs from "fs";
 import os from "os";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
-import { createServer as createViteServer } from "vite";
-
 const app = express();
 const PORT = 3000;
 
@@ -144,13 +142,15 @@ if (!isVercel) {
 
 // Vite middleware for development or Static route for production
 if (process.env.NODE_ENV !== "production" && !isVercel) {
-  createViteServer({
-    server: { middlewareMode: true },
-    appType: "spa",
-  }).then((vite) => {
-    app.use(vite.middlewares);
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Dev server running on port ${PORT}`);
+  import("vite").then(({ createServer: createViteServer }) => {
+    createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    }).then((vite) => {
+      app.use(vite.middlewares);
+      app.listen(PORT, "0.0.0.0", () => {
+        console.log(`Dev server running on port ${PORT}`);
+      });
     });
   });
 } else {
