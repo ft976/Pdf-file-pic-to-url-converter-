@@ -46,16 +46,6 @@ export default function UploadPage() {
 
   const validateAndSetFile = (selectedFile: File) => {
     setError(null);
-    const validTypes = [
-      "image/jpeg", "image/png", "image/webp", "image/gif",
-      "application/pdf", 
-      "application/msword", 
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    ];
-    if (!validTypes.includes(selectedFile.type)) {
-      setError("Please upload an image, PDF, or Word document.");
-      return;
-    }
     if (selectedFile.size > 50 * 1024 * 1024) {
       setError("File is too large. Maximum size is 50MB.");
       return;
@@ -101,7 +91,7 @@ export default function UploadPage() {
     <div className="max-w-2xl mx-auto w-full pt-8">
       <div className="mb-12 text-center">
         <h1 className="text-4xl md:text-5xl font-display font-semibold mb-4 text-white tracking-tight">Share files securely</h1>
-        <p className="text-white/50 text-lg max-w-md mx-auto">Upload any image or document to generate a secure link. Files auto-expire after 3 views or 2 hours.</p>
+        <p className="text-white/50 text-lg max-w-md mx-auto">Upload any file type (images, documents, zips) to generate a secure link. Files auto-expire in 24 hours.</p>
       </div>
 
       <AnimatePresence mode="wait">
@@ -191,7 +181,6 @@ export default function UploadPage() {
                   ref={fileInputRef}
                   onChange={handleChange}
                   className="hidden"
-                  accept="image/jpeg,image/png,image/webp,image/gif,application/pdf,.doc,.docx"
                 />
                 
                 <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 transition-all duration-300 ${isHovering ? "bg-orange-500 text-white scale-110 shadow-[0_0_20px_rgba(249,115,22,0.4)]" : "bg-white/5 text-white/40 group-hover:bg-white/10 group-hover:text-white/60"}`}>
@@ -200,7 +189,7 @@ export default function UploadPage() {
                 
                 <h3 className="font-display font-medium text-2xl mb-3 text-white tracking-tight">Drop your file here</h3>
                 <p className="text-white/40 text-sm max-w-[280px] text-center mb-8">
-                  Support for Images, PDFs, and Word Docs<br/>(max. 50MB)
+                  Support for any file type including docs and zips<br/>(max. 50MB)
                 </p>
 
                 <button 
