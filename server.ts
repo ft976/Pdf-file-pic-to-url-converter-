@@ -55,6 +55,17 @@ async function startServer() {
         return res.status(400).json({ error: "No file uploaded" });
       }
 
+      // Read custom expiry from request body, default to 24 hours (1440 minutes)
+      let customExpiryMs = 24 * 60 * 60 * 1000; // default 24 hours
+      if (req.body && req.body.expiryMinutes) {
+        const minutes = parseInt(req.body.expiryMinutes, 10);
+        if (!isNaN(minutes) && minutes > 0) {
+          // Clamp to maximum of 24 hours (1440 minutes)
+          const clampedMinutes = Math.min(minutes, 24 * 60);
+          customExpiryMs = clampedMinutes * 60 * 1000;
+        }
+      }
+
       const fileId = uuidv4();
       const fileData = {
         id: fileId,
@@ -63,7 +74,7 @@ async function startServer() {
         mimetype: req.file.mimetype,
         size: req.file.size,
         createdAt: Date.now(),
-        expiresAt: Date.now() + 24 * 60 * 60 * 1000, // Expires in 24 hours
+        expiresAt: Date.now() + customExpiryMs,
       };
 
       const db = getDb();

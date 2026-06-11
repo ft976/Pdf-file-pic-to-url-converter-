@@ -1,20 +1,17 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# EtherealShare
 
-# Run and deploy your AI Studio app
+EtherealShare is a secure, decentralized, ephemeral file sharing application. 
 
-This contains everything you need to run your app locally.
+## Features
+- **Lossless & Bit-Perfect**: Transfers are maintained flawlessly with zero compression and 100% metadata preservation.
+- **Ephemeral Storage**: Files expire automatically based on your selected timer (up to 24 hours max) with a built-in scrubbing mechanism to purge data thoroughly.
+- **Privacy-First**: No tracker cookies, no sign-ups, and a private local device history log.
+- **Development details**: Created by Rehan97 (GitHub: [ft976](https://github.com/ft976)). Connect on [LinkedIn](https://www.linkedin.com/in/rehan-ahmad-863386382?utm_source=share_via&utm_content=profile&utm_medium=member_android).
 
-View your app in AI Studio: https://ai.studio/apps/6736b7b8-20fe-44f6-bd50-8860209e8136
+## Getting Started
+Upload your files directly on the home page and share the generated ephemeral URL with your peers. 
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Developer
+- **Name:** Rehan97
+- **GitHub:** [ft976](https://github.com/ft976)
+- **LinkedIn:** [Profile](https://www.linkedin.com/in/rehan-ahmad-863386382?utm_source=share_via&utm_content=profile&utm_medium=member_android)

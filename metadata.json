@@ -1,6 +1,6 @@
 {
-  "name": "FileShare Link",
-  "description": "Convert PDF and images into a shareable link that anyone can access.",
+  "name": "EtherealShare",
+  "description": "Premium ephemeral secure file sharing. Create fast, self-destructing secure links for any file types (including PDFs, photos, documents, ZIPs) that automatically expire after 24 hours.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
